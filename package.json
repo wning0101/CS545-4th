@@ -1,0 +1,24 @@
+{
+  "name": "battlecode",
+  "version": "1.0.0",
+  "description": "battlecode game https://battlecode.org/dash/docs",
+  "main": "index.js",
+  "scripts": {
+    "start": "bc19run -b C:\\Users\\punam\\Documents\\Old-battlecode\\bots -r bots --chi 100.",
+    "test": "mocha --require babel-polyfill --require babel-register"
+  },
+  "keywords": [
+    "battlecode"
+  ],
+  "author": "punam",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "bc19": "^0.4.7",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  }
+}
