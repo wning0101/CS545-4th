@@ -80,7 +80,10 @@ crusader.takeTurn = (self) => {
       const isSameTeam = self.me.team === robot.team;
       return isSameTeam && robot.unit === SPECS.CRUSADER;
     })
-
+    const nearbyProphets = visibleBots.filter((robot) => {
+      const isSameTeam = self.me.team === robot.team;
+      return isSameTeam && robot.unit === SPECS.PROPHET;
+    })
     if (attackingBots.length > 0) {
       crusader.moveAwayRandomly(self, attackingBots);
     }
@@ -121,7 +124,8 @@ crusader.takeTurn = (self) => {
     // }
 
     //Attack when number is more than 5
-    if(nearbyCrusaders.length >= 5 || a === 1){
+    var size = nearbyCrusaders.length + nearbyProphets.length
+    if(size >= 10 || a === 1){
       a = 1;
       //go to the destination
       const choice = nav.goto(self, { x:self.destination.x, y: self.destination.y });

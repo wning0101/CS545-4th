@@ -1,0 +1,7 @@
+
+.vscode/
+node_modules/
+replay.bc19
+.DS_Store
+compiled_bot.js
+

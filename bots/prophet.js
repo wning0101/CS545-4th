@@ -13,6 +13,10 @@ prophet.takeTurn = (self) => {
         const isSameTeam = self.me.team === robot.team;
         return isSameTeam && robot.unit === SPECS.PROPHET;
       })
+      const nearbyCrusaders = visible.filter((robot) => {
+        const isSameTeam = self.me.team === robot.team;
+        return isSameTeam && robot.unit === SPECS.CRUSADER;
+      })
     // get attackable robots
     var attackable = visible.filter((r) => {
         if (! self.isVisible(r)){
@@ -92,8 +96,8 @@ prophet.takeTurn = (self) => {
     // if (choice) {
     //   return self.move(choice.x, choice.y);
     // }
-
-    if(nearbyProphet.length >= 5 || b === 1){
+    var size = nearbyCrusaders.length + nearbyProphet.length
+    if(size >= 10 || b === 1){
         b = 1;
         const choice = nav.goto(self, { x:self.destination.x, y: self.destination.y });
         if (choice) {
