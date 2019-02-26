@@ -177,6 +177,7 @@ class MyRobot extends BCAbstractRobot {
             this.prophetBuilt = 0;
             this.preacherBuilt = 0;
             this.prophetmax = 10;
+            this.troop = 0
             this.isHoReflect = true;
             this.mapLen = -1
             this.posx = 0
@@ -185,12 +186,34 @@ class MyRobot extends BCAbstractRobot {
             this.direction = 1
             this.crusader_x = 0
             this.crusader_y = 0
+            this.map_size = 0
+            this.enemy = [0,0]
+            this.route = 0
+            this.initial = false
+            this.pilgrim = false
+            this.k_urgent = 0
+            this.f_urgent = 0
         }
     turn() {
         this.step++;
-        if (this.step === 0) {
+        if (!this.initial) {
                     this.isHoReflect = nav.isHoReflect(this);
                     this.mapLen = this.map.length;
+                    this.enemy = nav.reflect(this.me, this.mapLen, this.isHoReflect);
+                    this.route = Math.abs(this.me.x - this.enemy[0]) + Math.abs(this.me.y - this.enemy[1])
+                    if(this.route <= 25){
+                        if(this.mapLen < 15){
+                            this.map_size = 0
+                        }
+                        else{
+                            this.map_size = 1
+                        }
+                    }
+                    else{
+                        this.map_size = 2
+                        this.pilgrimmax = 2
+                    }
+                    this.initial = true
                 }
 
         if (this.me.unit === SPECS.PREACHER) {
@@ -202,6 +225,9 @@ class MyRobot extends BCAbstractRobot {
                 var readytoattack = visible.filter((a) => {
                     if (! this.isVisible(a)){
                         return false;
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.PROPHET){
+                        return true
                     }
                     if (a.team === this.me.team && a.unit === SPECS.PREACHER){
                         return true
@@ -255,37 +281,60 @@ class MyRobot extends BCAbstractRobot {
                     this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
                 }
 
-                //this.log(readytoattack.length)
+                if (this.map_size < 2){
+                    const choice = nav.goto(this, this.destination);
+                    return this.move(choice.x, choice.y);
+                }
+
                 //after gathering, attack!!
-                if(readytoattack.length > 2){
+                if(readytoattack.length > 1 || this.attack_confirm){
+                    this.attack_confirm = true;
                     const choice = nav.goto(this, this.destination);
                     return this.move(choice.x, choice.y);
                 }
                 else{
                     if(this.isHoReflect){
-                        var choice1 = {x: this.destination.x, y: this.mapLen/2,}
+                        if(this.destination.y > this.mapLen/2 ){
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2 -5,}
+                        }
+                        else{
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2 +5,}
+                        }
                         const choices1 = nav.goto(this, choice1);
                         return this.move(choices1.x, choices1.y);
                     }
                     else{
-                        var choice2 = {x: this.mapLen/2, y: this.destination.y,}
+                        if(this.destination.x > this.mapLen/2 ){
+                            var choice2 = {x: this.mapLen/2 +5, y: this.destination.y,}
+                        }
+                        else{
+                            var choice2 = {x: this.mapLen/2 -5, y: this.destination.y,}
+                        }
                         const choices2 = nav.goto(this, choice2);
                         return this.move(choices2.x, choices2.y);
                     }
                 }
-                return this.move(choice.x, choice.y);
+                //return this.move(choice.x, choice.y);
         }
-        if (this.me.unit === SPECS.CRUSADER) {
-            this.log('crusader taking turn')
+        if (this.me.unit === SPECS.PROPHET) {
+            this.log('prophet taking turn')
 
                 var visible = this.getVisibleRobots();
-                // On the first turn, find out our base
-                if (!this.castle) {
-                    this.castle = visible
-                        .filter(robot => robot.team === this.me.team && robot.unit === SPECS.CASTLE)[0];
-                }
 
-                // get attackable robots
+                // get nearby preacher
+                var readytoattack = visible.filter((a) => {
+                    if (! this.isVisible(a)){
+                        return false;
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.PROPHET){
+                        return true
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.PREACHER){
+                        return true
+                    }
+                    return false;
+                });
+
                 var attackable = visible.filter((r) => {
                     if (! this.isVisible(r)){
                         return false;
@@ -324,7 +373,7 @@ class MyRobot extends BCAbstractRobot {
                 if (attackable.length>0){
                     // attack first robot
                     var r = attackable[0];
-                    this.log('attacking!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    this.log('attacking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
                     return this.attack(r.x - this.me.x, r.y - this.me.y);
                 }
 
@@ -332,15 +381,63 @@ class MyRobot extends BCAbstractRobot {
                     this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
                 }
 
-                const choice = nav.goto(this, this.destination);
-                return this.move(choice.x, choice.y);
-}
-        if (this.me.unit === SPECS.PROPHET){
-                this.log('prophet taking turn')
+                if (this.map_size < 2){
+                    const choice = nav.goto(this, this.destination);
+                    return this.move(choice.x, choice.y);
+                }
+
+                //after gathering, attack!!
+                if(readytoattack.length > 1 || this.attack_confirm){
+                    this.attack_confirm = true;
+                    const choice = nav.goto(this, this.destination);
+                    return this.move(choice.x, choice.y);
+                }
+                else{
+                    if(this.isHoReflect){
+                        if(this.destination.y > this.mapLen/2 ){
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2 -5,}
+                        }
+                        else{
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2 +5,}
+                        }
+                        const choices1 = nav.goto(this, choice1);
+                        return this.move(choices1.x, choices1.y);
+                    }
+                    else{
+                        if(this.destination.x > this.mapLen/2 ){
+                            var choice2 = {x: this.mapLen/2 +5, y: this.destination.y,}
+                        }
+                        else{
+                            var choice2 = {x: this.mapLen/2 -5, y: this.destination.y,}
+                        }
+                        const choices2 = nav.goto(this, choice2);
+                        return this.move(choices2.x, choices2.y);
+                    }
+                }
+                //return this.move(choice.x, choice.y);
+        }
+        if (this.me.unit === SPECS.CRUSADER) {
+            this.log('crusader taking turn')
 
                 var visible = this.getVisibleRobots();
 
-                // get attackable robots
+                // get nearby preacher
+                var readytoattack = visible.filter((a) => {
+                    if (! this.isVisible(a)){
+                        return false;
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.CRUSADER){
+                        return true
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.PROPHET){
+                        return true
+                    }
+                    if (a.team === this.me.team && a.unit === SPECS.PREACHER){
+                        return true
+                    }
+                    return false;
+                });
+
                 var attackable = visible.filter((r) => {
                     if (! this.isVisible(r)){
                         return false;
@@ -376,40 +473,54 @@ class MyRobot extends BCAbstractRobot {
                     return this.move(otherDir.x, otherDir.y);
                 }
 
-
                 if (attackable.length>0){
                     // attack first robot
                     var r = attackable[0];
-                    this.log('attacking!!!!!!!!!!!!!!!!!!');
+                    this.log('attacking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
                     return this.attack(r.x - this.me.x, r.y - this.me.y);
                 }
 
-                    if (!this.destination) {
+                if (!this.destination) {
                     this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
                 }
-// gathering at the middle+8 closer to the enemy
-                if(this.isHoReflect){
-                    if(this.destination.y > this.mapLen/2 ){
-                        this.destination.y = this.destination.y -8
-                    }
-                    else{
-                        this.destination.y = this.destination.y +8
-                    }
+
+                if (this.map_size < 2){
+                    const choice = nav.goto(this, this.destination);
+                    return this.move(choice.x, choice.y);
+                }
+
+                //after gathering, attack!!
+                if(readytoattack.length > 3 || this.attack_confirm){
+                    this.attack_confirm = true;
+                    const choice = nav.goto(this, this.destination);
+                    return this.move(choice.x, choice.y);
                 }
                 else{
-                    if(this.destination.x > this.mapLen/2 ){
-                        this.destination.x = this.destination.x -8
+                    if(this.isHoReflect){
+                        if(this.destination.y > this.mapLen/2 ){
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2,}
+                        }
+                        else{
+                            var choice1 = {x: this.destination.x, y: this.mapLen/2,}
+                        }
+                        const choices1 = nav.goto(this, choice1);
+                        return this.move(choices1.x, choices1.y);
                     }
                     else{
-                        this.destination.x = this.destination.x +8
+                        if(this.destination.x > this.mapLen/2 ){
+                            var choice2 = {x: this.mapLen/2, y: this.destination.y,}
+                        }
+                        else{
+                            var choice2 = {x: this.mapLen/2, y: this.destination.y,}
+                        }
+                        const choices2 = nav.goto(this, choice2);
+                        return this.move(choices2.x, choices2.y);
                     }
                 }
-
-                const choice = nav.goto(this, this.destination);
-
-                return this.move(choice.x, choice.y);
-
+                //return this.move(choice.x, choice.y);
         }
+
+
         if (this.me.unit === SPECS.PILGRIM){
             this.log('pilgrim taking turn')
                 var visiblebots = this.getVisibleRobots()
@@ -462,25 +573,47 @@ class MyRobot extends BCAbstractRobot {
         }
 
         else if (this.me.unit === SPECS.CASTLE) {
-            /*
-            if (this.one) {
-                this.log('Building a prophet');
-                this.one = false
-                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)]
-                return this.buildUnit(SPECS.PROPHET, choice[0], choice[1]);
+            var visible = this.getVisibleRobots();
+
+                            // get nearby preacher
+            var surroundpilgrom = visible.filter((a) => {
+                this.castle_number = 0
+                if (! this.isVisible(a)){
+                    return false;
+                }
+                if (a.team === this.me.team && a.unit === SPECS.PILGRIM){
+                    return true
+                }
+                if (a.team === this.me.team && a.unit === SPECS.CASTLE){
+                    this.castle_number += 1
+                }
+                return false;
+                });
+            if (surroundpilgrom.length < 2 + 2*this.castle_number){
+                this.builtpilgram = true;
             }
 
-            if (this.two) {
-                this.log('Building a prophet');
-                this.two = false
-                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)]
-                return this.buildUnit(SPECS.PROPHET, choice[0], choice[1]);
+            if (this.karbonite === 0 || this.fuel === 0){
+                if(this.karbonite === 0){
+                    this.k_urgent++;
+                }
+                if(this.fuel == 0){
+                    this.f_urgent++;
+                }
             }
-            */
 
-            if (this.pilgrimsBuilt <= this.pilgrimmax) {
+            if (this.k_urgent > 5 || this.f_urgent > 5){
+                if(this.k_urgent>5){
+                this.k_urgent = 0
+                this.builtpilgram = true;
+                }
+                else{
+                this.f_urgent = 0
+                this.builtpilgram = true;
+                }
+            }
+
+            if (this.pilgrimsBuilt <= this.pilgrimmax || this.builtpilgram) {
 
                 this.log('Building a pilgrim');
                 this.pilgrimsBuilt++;
@@ -489,7 +622,7 @@ class MyRobot extends BCAbstractRobot {
                 if(this.pilgrimsBuilt >= 2){
                 this.prophetmax = 100
                 }
-
+                this.builtpilgram = false
                 return this.buildUnit(SPECS.PILGRIM, choice[0], choice[1]);
 
             }
@@ -513,27 +646,43 @@ class MyRobot extends BCAbstractRobot {
             }
             */
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax /*&& this.prophetBuilt < this.prophetmax*/){
-                this.log('Building a prophet');
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 2){
+
+                this.log('Building a preacher')
+                this.troop++;
+                this.preacherBuilt++;
+                if(this.preacherBuilt >= 3){
+                    this.pilgrimmax = 3
+                }
+                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+                const choice = choices[Math.floor(Math.random()*choices.length)]
+                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
+
+            }
+
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 0){
+                this.log('Building a preacher');
                 this.prophetBuilt++;
                 if(this.prophetBuilt >= 3){
-                    this.pilgrimmax = 2
+                    this.pilgrimmax = 3
                 }
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
                 const choice = choices[Math.floor(Math.random()*choices.length)]
                 return this.buildUnit(SPECS.PREACHER, choice[0], choice[1]);
             }
 
-            /*
-            if (this.pilgrimsBuilt >= 2){
+
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 1){
                 this.log('Building a preacher');
                 this.preacherBuilt++;
-
+                if(this.preacherBuilt >= 3){
+                    this.pilgrimmax = 3
+                }
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
                 const choice = choices[Math.floor(Math.random()*choices.length)]
-                return this.buildUnit(SPECS.PREACHER, choice[0], choice[1]);
+                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
             }
-            */
+
 
             else {
                 return this.log("Castle health: " + this.me.health);
