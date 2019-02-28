@@ -15,8 +15,8 @@
       <file leaf-file-name="robot.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/robot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10690">
-              <caret line="746" column="20" selection-start-line="746" selection-start-column="20" selection-end-line="746" selection-end-column="20" />
+            <state relative-caret-position="238">
+              <caret line="719" column="76" lean-forward="true" selection-start-line="719" selection-start-column="76" selection-end-line="719" selection-end-column="76" />
             </state>
           </provider>
         </entry>
@@ -41,7 +41,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -53,8 +55,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="RunDashboard">
@@ -141,7 +141,7 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26200506" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23167649" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
@@ -165,6 +165,13 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/robot.js">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1185">
+          <caret line="79" column="9" lean-forward="true" selection-start-line="79" selection-start-column="9" selection-end-line="79" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/robot.js">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2625">
           <caret line="175" column="31" selection-start-line="175" selection-start-column="31" selection-end-line="175" selection-end-column="31" />
         </state>
@@ -184,10 +191,15 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/compiled_bot10.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1345" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/robot.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10690">
-          <caret line="746" column="20" selection-start-line="746" selection-start-column="20" selection-end-line="746" selection-end-column="20" />
+        <state relative-caret-position="238">
+          <caret line="719" column="76" lean-forward="true" selection-start-line="719" selection-start-column="76" selection-end-line="719" selection-end-column="76" />
         </state>
       </provider>
     </entry>
