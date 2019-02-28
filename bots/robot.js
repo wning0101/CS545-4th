@@ -1,4 +1,4 @@
-import {BCAbstractRobot, SPECS} from 'bc19';
+import {BCAbstractRobot, SPECS} from 'battlecode';
 import nav from './nav.js';
 import pilgrim from './pilgrim.js';
 import crusader from './crusader.js';

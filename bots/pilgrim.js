@@ -1,4 +1,4 @@
-import { SPECS } from 'bc19';
+import { SPECS } from 'battlecode';
 import nav from './nav.js';
 
 const pilgrim = {};

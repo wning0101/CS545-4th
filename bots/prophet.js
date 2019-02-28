@@ -1,4 +1,4 @@
-import { SPECS } from 'bc19';
+import { SPECS } from 'battlecode';
 import nav from './nav.js';
 
 const prophet = {};
@@ -97,7 +97,7 @@ prophet.takeTurn = (self) => {
     //   return self.move(choice.x, choice.y);
     // }
     var size = nearbyCrusaders.length + nearbyProphet.length
-    if(size >= 20 || b === 1){
+    if(size >= 10 || b === 1){
         b = 1;
         const choice = nav.goto(self, { x:self.destination.x, y: self.destination.y });
         if (choice) {
@@ -105,12 +105,7 @@ prophet.takeTurn = (self) => {
         }
     
       }else{
-        let x = self.direction.x
-        const y = self.direction.y
-        while(visible.some(bot=> bot.me.x === x && bot.me.y === y) ){
-            x = x+1;
-        }
-        const choice = nav.goto(self, { x , y });
+        const choice = nav.goto(self, { x:self.destination.x - 8, y: self.destination.y - 8 });
         if (choice) {
           return self.move(choice.x, choice.y);
        }
