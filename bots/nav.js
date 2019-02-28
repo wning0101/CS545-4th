@@ -43,6 +43,9 @@ nav.offsetList = [
 nav.rotateTry = [1, -1, 2, -2, 3, -3, 4];
 
 nav.toCompassDir = (dir) => {
+    if (dir == null){
+        throw new Error("Dir is manadatory!")
+    }
     return nav.compass[dir.y + 1][dir.x + 1];
 };
 

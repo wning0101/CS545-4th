@@ -1,14 +1,17 @@
-import { SPECS } from 'battlecode';
+import { SPECS } from 'bc19';
 import nav from './nav.js';
 
 const castle = {};
+let x = -2;
+let y = -2;
+castle.getMessagingRobots = (bots) => bots.filter(robot => {
+    return robot.castle_talk != null;
+});
 castle.takeTurn = (self) => {
     self.log('castle taking turn');
    
     const visible = self.getVisibleRobots();
-    const messagingRobots = visible.filter(robot => {
-        return robot.castle_talk != null;
-    });
+    const messagingRobots = this.getMessagingRobots(visible)
 
     const getBuildDir = () => {
         const options = nav.offsetList.filter((direction) => nav.isPassable(
@@ -110,13 +113,14 @@ castle.takeTurn = (self) => {
         //     return id;
         // }
             const direction = getBuildDir();
+
             
             if(direction != null){
                 let type = SPECS.PILGRIM
                 if(self.crusadersBuilt % 5 !== 0 || self.crusadersBuilt === 0){
                     type = SPECS.CRUSADER;
                     self.crusadersBuilt += 1;   
-                }else if(self.prophetBuilt % 5!== 0 || self.prophetBuilt === 0) {
+                }else if(self.prophetBuilt % 25!== 0 || self.prophetBuilt === 0) {
                     type = SPECS.PROPHET
                     self.prophetBuilt += 1;
                 }else if(self.preacherBuilt % 2!== 0 || self.preacherBuilt === 0){
@@ -130,7 +134,12 @@ castle.takeTurn = (self) => {
                     self.preacherBuilt += 1;
                     self.prophetBuilt += 1;
                 }
-                return self.buildUnit(type, direction.x, direction.y);
+                // if( type === SPECS.PROPHET){
+                //     console.log("Making Prophets")
+                //     return self.buildUnit(type, direction.x+ x + self.prophetBuilt % 5 - 1, direction.y + y - Math.floor(self.prophetBuilt / 5));
+                // }else{
+                    return self.buildUnit(type, direction.x, direction.y);
+                // }
             } else {
                 self.log('direction is null');
             }
