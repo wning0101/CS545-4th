@@ -1,4 +1,4 @@
-import {SPECS} from 'battlecode';
+import {SPECS} from 'bc19';
 import nav from './nav.js';
 
 const preacher = {};

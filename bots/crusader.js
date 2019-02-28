@@ -1,4 +1,4 @@
-import {SPECS} from 'battlecode';
+import {SPECS} from 'bc19';
 import nav from './nav.js';
 
 const crusader = {};
@@ -124,22 +124,22 @@ crusader.takeTurn = (self) => {
     // }
 
     //Attack when number is more than 5
-    var size = nearbyCrusaders.length + nearbyProphets.length
-    if(size >= 10 || a === 1){
-      a = 1;
-      //go to the destination
-      const choice = nav.goto(self, { x:self.destination.x, y: self.destination.y });
-      if (choice) {
-        return self.move(choice.x, choice.y);
-      }
+    // var size = nearbyCrusaders.length + nearbyProphets.length
+    // if(size >= 10 || a === 1){
+    //   a = 1;
+    //   //go to the destination
+    //   const choice = nav.goto(self, { x:self.destination.x, y: self.destination.y });
+    //   if (choice) {
+    //     return self.move(choice.x, choice.y);
+    //   }
   
-    }else{
+    // }else{
       //got to the location outside the enemy castle range
-      const choice =  nav.goto(self, { x:self.destination.x - 9, y: self.destination.y - 9 });
+      const choice =  nav.goto(self, { x:self.destination.x - 12, y: self.destination.y - 12 });
       if (choice) {
         return self.move(choice.x, choice.y);
      }
-   }
+  //  }
 
 }
 export default crusader;
