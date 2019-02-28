@@ -3,5 +3,6 @@
 node_modules/
 replay.bc19
 .DS_Store
+.gitignore
 compiled_bot.js
 
