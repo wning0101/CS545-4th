@@ -41,7 +41,7 @@ nav.toCoordinateDir = (dir) => {
 
 nav.rotate = (dir, amount) => {
     const compassDir = nav.toCompassDir(dir);
-    const rotateCompassDir = nav.rotateArr[(nav.rotateArrInd[compassDir] + amount) % nav.rotateArr.length];  //BUG HERE: can't call length of rotateArrInd; used rotateArr instead
+    const rotateCompassDir = nav.rotateArr[(nav.rotateArrInd[compassDir] + amount) % nav.rotateArr.length];
     return nav.toCoordinateDir(rotateCompassDir);
 };
 
@@ -205,11 +205,21 @@ class MyRobot extends BCAbstractRobot {
         }
     turn() {
         this.step++;
+        // This statement is creating the initial state, including which type of symmetric and what's the size of the map
         if (!this.initial) {
                     this.isHoReflect = nav.isHoReflect(this);
+                    // symmetric type
+                    // unit test: if the type is right, vertical or horizontal
                     this.mapLen = this.map.length;
+                    // enemy position
+                    // unit test: if enemy is around there
                     this.enemy = nav.reflect(this.me, this.mapLen, this.isHoReflect);
+                    // distance between enemy and us
+                    // uint test: if the distance is right
                     this.route = Math.abs(this.me.x - this.enemy[0]) + Math.abs(this.me.y - this.enemy[1])
+
+                    // Setting the map_size: 0 is the smallest, 1 is the medium, 2 is the biggest
+                    // unit test: if the size is correct
                     if(this.route <= 25){
                         if(this.mapLen < 15){
                             this.map_size = 0
@@ -230,7 +240,7 @@ class MyRobot extends BCAbstractRobot {
 
                 var visible = this.getVisibleRobots();
 
-                // get nearby preacher
+                // collecting nearby preacher
                 var readytoattack = visible.filter((a) => {
                     if (! this.isVisible(a)){
                         return false;
@@ -312,7 +322,9 @@ class MyRobot extends BCAbstractRobot {
                     return this.move(choice.x, choice.y);
                 }
 
-                //after gathering, attack!!
+                //if there are more than 2 preacher or prophet, then go atttacking
+                //unit test: if they go attacking after they have enough company
+
                 if(readytoattack.length > 2 || this.attack_confirm){
                     this.attack_confirm = true;
                     const choice = nav.goto(this, this.destination);
@@ -412,8 +424,9 @@ class MyRobot extends BCAbstractRobot {
                     return this.move(choice.x, choice.y);
                 }
 
-                //after gathering, attack!!
-                if(readytoattack.length > 1 || this.attack_confirm){
+                //if there are more than 2 preacher or prophet, then go atttacking
+                //unit test: if they go attacking after they have enough company
+                if(readytoattack.length > 2 || this.attack_confirm){
                     this.attack_confirm = true;
                     const choice = nav.goto(this, this.destination);
                     return this.move(choice.x, choice.y);
@@ -526,7 +539,9 @@ class MyRobot extends BCAbstractRobot {
                     }
                 }
 
-                //after gathering, attack!!
+
+                //if there are more than 2 preacher or prophet or crusader, then go atttacking
+                //unit test: if they go attacking after they have enough company
                 if(readytoattack.length > 2 || this.attack_confirm){
                     this.attack_confirm = true;
                     const choice = nav.goto(this, this.destination);
@@ -573,6 +588,8 @@ class MyRobot extends BCAbstractRobot {
                 });
                 if(!this.first_birth){
                     this.first_birth = true
+                //if there are more than 3 pilgrims round, then go exploring
+                //unit test: if they go exploring after it have enough pilgrims in ths base
                     if (readytoexplore.length > 3){
                         this.go_explore = true
                     }
@@ -586,15 +603,13 @@ class MyRobot extends BCAbstractRobot {
                     if (!this.explore_destination){
                         this.explore_destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
                     }
-
-                    if (this.me.x <= this.explore_destination.x+5 && this.me.x >= this.explore_destination.x-5){
-                        if(this.me.y <= this.explore_destination.y+5 && this.me.y >= this.explore_destination.y-5){
+                    if (readytoexplore.length < 1){
                             this.new_explore_destination = nav.getClosestRsrc(this.me, this.getKarboniteMap());
                             this.explore_destination = this.new_explore_destination[0];
                             this.buildchurch = true;
                             this.done = false;
-                        }
                     }
+
 
                     const choice_t = nav.goto(this, this.explore_destination);
                     if (this.buildchurch && !this.done){
@@ -682,6 +697,9 @@ class MyRobot extends BCAbstractRobot {
                 }
                 return false;
                 });
+
+            //if there are less than 2 pilgrim around the castle, then build on more pilgrim
+            //unit test: if the castle builds another pilgrim if there is not enough pilgrim around
             if (surroundpilgrom.length < 2 + 2*this.castle_number){
                 this.builtpilgram = true;
             }
@@ -721,7 +739,7 @@ class MyRobot extends BCAbstractRobot {
             }
 
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 2){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 2 && this.karbonite>100){
 
 
                 this.log('Building a crusader')
@@ -735,7 +753,7 @@ class MyRobot extends BCAbstractRobot {
                 return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
             }
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 0){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 0 && this.karbonite>100){
                 this.log('Building a preacher');
                 this.prophetBuilt++;
                 if(this.prophetBuilt >= 3){
@@ -747,7 +765,7 @@ class MyRobot extends BCAbstractRobot {
             }
 
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 1){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 1 && this.karbonite>100){
                 this.log('Building a crusader');
                 this.crusaderBuilt++;
                 if(this.crusaderBuilt >= 3){

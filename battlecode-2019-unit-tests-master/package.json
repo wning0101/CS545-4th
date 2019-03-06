@@ -1,0 +1,29 @@
+{
+  "name": "Battlecode2019",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "private": true,
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register bot/**/*.spec.js",
+    "coverage": "./node_modules/nyc/bin/nyc.js --reporter=text ./node_modules/mocha/bin/_mocha --compilers js:babel-core/register bot/**/*.spec.js",
+    "build": "tsc && cd bot && rm compiled_bot.js; node ../node_modules/bc19/cli/compile.js -d . && cd .."
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.3.0"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "bc19": "^0.4.7"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  }
+}
