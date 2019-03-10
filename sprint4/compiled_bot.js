@@ -430,7 +430,7 @@ class MyRobot extends BCAbstractRobot {
             this.crusaderBuilt = 0;
             this.step = -1;
             this.pilgrimsBuilt = 0;
-            this.pilgrimmax = 1;
+            this.pilgrimmax = 3;
             this.prophetBuilt = 0;
             this.preacherBuilt = 0;
             this.prophetmax = 10;
@@ -780,7 +780,7 @@ class MyRobot extends BCAbstractRobot {
                             this.destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
                             this.turnaround === 2;
                         }
-                        if(this.turnaround === 2){
+                        else if(this.turnaround === 2){
                             this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
                             this.turnaround === 1;
                         }
@@ -834,11 +834,22 @@ class MyRobot extends BCAbstractRobot {
                     }
                     return false;
                 });
+
+                var seechurch = visiblebots.filter(k => {
+                    if (! this.isVisible(k)){
+                        return false;
+                    }
+                    if (k.team === this.me.team && k.unit === SPECS.CHURCH){
+                        return true
+                    }
+                    return false;
+                });
+
                 if(!this.first_birth){
                     this.first_birth = true;
                 //if there are more than 3 pilgrims round, then go exploring
                 //unit test: if they go exploring after it have enough pilgrims in ths base
-                    if (readytoexplore.length > 3){
+                    if (readytoexplore.length > 2){
                         this.go_explore = true;
                     }
                     else{
@@ -851,24 +862,28 @@ class MyRobot extends BCAbstractRobot {
                     if (!this.explore_destination){
                         this.explore_destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
                     }
-                    if (readytoexplore.length < 1){
+                    if (readytoexplore.length < 2){
                             this.new_explore_destination = nav.getClosestRsrc(this.me, this.getKarboniteMap());
                             this.explore_destination = this.new_explore_destination[0];
                             this.buildchurch = true;
                             this.done = false;
                     }
 
-
-                    const choice_t = nav.goto(this, this.explore_destination);
                     if (this.buildchurch && !this.done){
-                        if (this.me.x <= this.explore_destination.x+5 && this.me.x >= this.explore_destination.x-5){
-                            if(this.me.y <= this.explore_destination.y+5 && this.me.y >= this.explore_destination.y-5){
-                                this.done = true;
+                        if (this.me.x <= this.explore_destination.x+2 && this.me.x >= this.explore_destination.x-2){
+                            if(this.me.y <= this.explore_destination.y+2 && this.me.y >= this.explore_destination.y-2){
                                 return this.buildUnit(SPECS.CHURCH, 1, 1)
                             }
                         }
                     }
 
+                    if(seechurch.length > 0){
+                    	this.done = true;
+                        this.go_explore = false;
+                    }
+
+                    var choice_t1 = {x: this.explore_destination.x, y: this.explore_destination.y,};
+                    const choice_t = nav.goto(this, choice_t1);
                     return this.move(choice_t.x, choice_t.y)
                 }
                 // On the first turn, find out our base
@@ -946,9 +961,41 @@ class MyRobot extends BCAbstractRobot {
                 return false;
                 });
 
+            var attackable = visible.filter((r) => {
+                    if (! this.isVisible(r)){
+                        return false;
+                    }
+                    const dist = (r.x-this.me.x)**2 + (r.y-this.me.y)**2;
+                    if (r.team !== this.me.team
+                        && SPECS.UNITS[this.me.unit].ATTACK_RADIUS[0] <= dist
+                        && dist <= SPECS.UNITS[this.me.unit].ATTACK_RADIUS[1] ){
+                        return true;
+                    }
+                    return false;
+                });
+
+                const attacking = visible.filter(r => {
+                    if (r.team === this.me.team) {
+                        return false;
+                    }
+
+                    if (nav.sqDist(r, this.me) <= SPECS.UNITS[this.me.unit].ATTACK_RADIUS[0]) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+
+            if (attackable.length>0){
+                    // attack first robot
+                    var r = attackable[0];
+                    this.log('attacking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    return this.attack(r.x - this.me.x, r.y - this.me.y);
+                }
+
             //if there are less than 2 pilgrim around the castle, then build on more pilgrim
             //unit test: if the castle builds another pilgrim if there is not enough pilgrim around
-            if (surroundpilgrom.length < 2 + 2*this.castle_number){
+            if (surroundpilgrom.length < 2*this.castle_number){
                 this.builtpilgram = true;
             }
 
@@ -972,64 +1019,65 @@ class MyRobot extends BCAbstractRobot {
                 }
             }
 
-            if (this.pilgrimsBuilt <= this.pilgrimmax || this.builtpilgram) {
+            if(surroundpilgrom.length >= 3){
+            	this.threepilgrim = true;
+            }
+
+            if (this.pilgrimsBuilt < this.pilgrimmax || this.builtpilgram || !this.threepilgrim) {
 
                 this.log('Building a pilgrim');
                 this.pilgrimsBuilt++;
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
                 const choice = choices[Math.floor(Math.random()*choices.length)];
-                if(this.pilgrimsBuilt >= 2){
-                this.prophetmax = 100;
-                }
                 this.builtpilgram = false;
                 return this.buildUnit(SPECS.PILGRIM, choice[0], choice[1]);
 
             }
 
+             
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 2 && this.karbonite>100){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 50 && this.threepilgrim){
 
 
-                this.log('Building a crusader');
-                this.crusaderBuilt++;
-
-                if(this.crusaderBuilt >= 3){
-                    this.pilgrimmax = 3;
-                }
-                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)];
-                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
-            }
-
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 0 && this.karbonite>100){
                 this.log('Building a preacher');
-                this.prophetBuilt++;
-                if(this.prophetBuilt >= 3){
+                this.preacherBuilt++;
+
+                if(this.preacherBuilt >= 3){
                     this.pilgrimmax = 3;
                 }
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
                 const choice = choices[Math.floor(Math.random()*choices.length)];
                 return this.buildUnit(SPECS.PREACHER, choice[0], choice[1]);
             }
+            
 
+            if (this.preacherBuilt >= 50 && surroundpilgrom.length >= 2){
+                this.log('Building a crusader');
+                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+                const choice = choices[Math.floor(Math.random()*choices.length)];
+                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
+            }
+            /*
 
             if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 1 && this.karbonite>100){
                 this.log('Building a crusader');
                 this.crusaderBuilt++;
                 if(this.crusaderBuilt >= 3){
-                    this.pilgrimmax = 3;
+                    this.pilgrimmax = 3
                 }
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)];
+                const choice = choices[Math.floor(Math.random()*choices.length)]
                 return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
             }
 
-
+			*/
             else {
                 return this.log("Castle health: " + this.me.health);
             }
         }
         else if (this.me.unit === SPECS.CHURCH) {
+
+        	this.log("CHURCH~~~~~~~~~~~~~~~~CHURCH");
             var visible = this.getVisibleRobots();
 
                             // get nearby preacher
@@ -1046,7 +1094,40 @@ class MyRobot extends BCAbstractRobot {
                 }
                 return false;
                 });
-            if (surroundpilgrom.length < 2 + 2*this.castle_number){
+
+            var attackable = visible.filter((r) => {
+                    if (! this.isVisible(r)){
+                        return false;
+                    }
+                    const dist = (r.x-this.me.x)**2 + (r.y-this.me.y)**2;
+                    if (r.team !== this.me.team
+                        && SPECS.UNITS[this.me.unit].ATTACK_RADIUS[0] <= dist
+                        && dist <= SPECS.UNITS[this.me.unit].ATTACK_RADIUS[1] ){
+                        return true;
+                    }
+                    return false;
+                });
+
+                const attacking = visible.filter(r => {
+                    if (r.team === this.me.team) {
+                        return false;
+                    }
+
+                    if (nav.sqDist(r, this.me) <= SPECS.UNITS[this.me.unit].ATTACK_RADIUS[0]) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+
+            if (attackable.length>0){
+                    // attack first robot
+                    var r = attackable[0];
+                    this.log('attacking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    return this.attack(r.x - this.me.x, r.y - this.me.y);
+                }
+
+            if (surroundpilgrom.length < 3*this.castle_number){
                 this.builtpilgram = true;
             }
 
@@ -1085,7 +1166,7 @@ class MyRobot extends BCAbstractRobot {
             }
 
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 2){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 50 && this.fuel > 50){
 
                 this.log('Building a crusader');
                 this.crusaderBuilt++;
@@ -1097,30 +1178,6 @@ class MyRobot extends BCAbstractRobot {
                 const choice = choices[Math.floor(Math.random()*choices.length)];
                 return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
             }
-
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 0){
-                this.log('Building a preacher');
-                this.prophetBuilt++;
-                if(this.prophetBuilt >= 3){
-                    this.pilgrimmax = 3;
-                }
-                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)];
-                return this.buildUnit(SPECS.PREACHER, choice[0], choice[1]);
-            }
-
-
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.map_size === 1){
-                this.log('Building a crusader');
-                this.crusaderBuilt++;
-                if(this.crusaderBuilt >= 3){
-                    this.pilgrimmax = 3;
-                }
-                const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
-                const choice = choices[Math.floor(Math.random()*choices.length)];
-                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
-            }
-
 
             else {
                 return this.log("Castle health: " + this.me.health);
