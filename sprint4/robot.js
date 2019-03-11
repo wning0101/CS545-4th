@@ -310,17 +310,19 @@ class MyRobot extends BCAbstractRobot {
                             this.destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
                             this.turnaround === 2;
                         }
-                        if(this.turnaround === 2){
+                        else if(this.turnaround === 2){
                             this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
                             this.turnaround === 1
                         }
                     }
                 }
 
+                /*
                 if (this.map_size < 2){
                     const choice = nav.goto(this, this.destination);
                     return this.move(choice.x, choice.y);
                 }
+                */
 
                 //if there are more than 2 preacher or prophet, then go atttacking
                 //unit test: if they go attacking after they have enough company
@@ -417,12 +419,26 @@ class MyRobot extends BCAbstractRobot {
 
                 if (!this.destination) {
                     this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
+
                 }
 
-                if (this.map_size < 2){
-                    const choice = nav.goto(this, this.destination);
-                    return this.move(choice.x, choice.y);
+                if (!this.turnaround) {
+                    this.turnaround = 1
                 }
+
+                if (this.me.x <= this.destination.x+3 && this.me.x >= this.destination.x-3){
+                    if(this.me.y <= this.destination.y+3 && this.me.y >= this.destination.y-3){
+                        if(this.turnaround === 1){
+                            this.destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
+                            this.turnaround === 2;
+                        }
+                        else if(this.turnaround === 2){
+                            this.destination = nav.reflect(this.me, this.mapLen, this.isHoReflect);
+                            this.turnaround === 1
+                        }
+                    }
+                }
+
 
                 //if there are more than 2 preacher or prophet, then go atttacking
                 //unit test: if they go attacking after they have enough company
@@ -526,8 +542,8 @@ class MyRobot extends BCAbstractRobot {
                     this.turnaround = 1
                 }
 
-                if (this.me.x <= this.destination.x+1 && this.me.x >= this.destination.x-1){
-                    if(this.me.y <= this.destination.y+1 && this.me.y >= this.destination.y-1){
+                if (this.me.x <= this.destination.x+3 && this.me.x >= this.destination.x-3){
+                    if(this.me.y <= this.destination.y+3 && this.me.y >= this.destination.y-3){
                         if(this.turnaround === 1){
                             this.destination = nav.reflect(this.me, this.mapLen, !this.isHoReflect);
                             this.turnaround === 2;
@@ -621,18 +637,21 @@ class MyRobot extends BCAbstractRobot {
                             this.done = false;
                     }
 
+                    if(seechurch.length > 0){
+                        this.done = true;
+                        this.go_explore = false;
+                    }
+
                     if (this.buildchurch && !this.done){
                         if (this.me.x <= this.explore_destination.x+2 && this.me.x >= this.explore_destination.x-2){
                             if(this.me.y <= this.explore_destination.y+2 && this.me.y >= this.explore_destination.y-2){
-                                return this.buildUnit(SPECS.CHURCH, 1, 1)
+                                const choices_C = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+                                const choice_C = choices_C[Math.floor(Math.random()*choices_C.length)]
+                                return this.buildUnit(SPECS.CHURCH, choice_C[0], choice_C[1])
                             }
                         }
                     }
 
-                    if(seechurch.length > 0){
-                    	this.done = true;
-                        this.go_explore = false;
-                    }
 
                     var choice_t1 = {x: this.explore_destination.x, y: this.explore_destination.y,}
                     const choice_t = nav.goto(this, choice_t1);
@@ -788,7 +807,7 @@ class MyRobot extends BCAbstractRobot {
 
              
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 50 && this.threepilgrim){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 40 && this.threepilgrim){
 
 
                 this.log('Building a preacher')
@@ -842,6 +861,9 @@ class MyRobot extends BCAbstractRobot {
                     return true
                 }
                 if (a.team === this.me.team && a.unit === SPECS.CASTLE){
+                    this.castle_number += 1
+                }
+                if (a.team === this.me.team && a.unit === SPECS.CHURCH){
                     this.castle_number += 1
                 }
                 return false;
@@ -918,9 +940,9 @@ class MyRobot extends BCAbstractRobot {
             }
 
 
-            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 50 && this.fuel > 50){
+            if (this.pilgrimsBuilt >= this.pilgrimmax && this.karbonite > 60 && this.fuel > 60){
 
-                this.log('Building a crusader')
+                this.log('Building a prophet')
                 this.crusaderBuilt++;
 
                 if(this.crusaderBuilt >= 3){
@@ -928,7 +950,7 @@ class MyRobot extends BCAbstractRobot {
                 }
                 const choices = [[0,-1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
                 const choice = choices[Math.floor(Math.random()*choices.length)]
-                return this.buildUnit(SPECS.CRUSADER, choice[0], choice[1]);
+                return this.buildUnit(SPECS.PROPHET, choice[0], choice[1]);
             }
 
             else {
