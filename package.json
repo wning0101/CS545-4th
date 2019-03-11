@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "bc19run -b C:\\Users\\punam\\Documents\\Old-battlecode\\bots -r bots --chi 100.",
-    "test": "mocha --require @babel/polyfill --require @babel/register"
+    "test": "nyc mocha --require @babel/polyfill --require @babel/register"
   },
   "keywords": [
     "battlecode"
@@ -20,6 +20,7 @@
     "babel-loader": "^8.0.5",
     "bc19": "^0.4.7",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "nyc": "^13.3.0"
   }
 }
